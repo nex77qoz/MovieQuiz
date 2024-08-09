@@ -7,7 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-    private var statisticService: StatisticService?
+    private var statisticService: StatisticServiceProtocol?
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else { return }
@@ -39,7 +39,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.borderWidth = 8 // толщина рамки
-        imageView.layer.cornerRadius = 6 // радиус скругления углов рамки
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         if isCorrect == true {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor// делаем рамку зеленой
             correctAnswers += 1
@@ -76,7 +76,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             statisticService?.store(correct: correctAnswers, total: questionsAmount)
             let totalAccuracy = String(format: "%.2f", statisticService?.totalAccuracy ?? 0.0)
             let text =
-            "Ваш результат \(correctAnswers)/10,\n Количество сыгранных квизов: \(String(statisticService?.gamesCount ?? 0))\n Рекорд: \(String(statisticService?.bestGame.correct ?? 0)) (\(statisticService?.bestGame.date.dateTimeString ?? ""))\n Средняя точность: \(totalAccuracy)%"
+            "Ваш результат \(correctAnswers)/10,\n Количество сыгранных квизов: \(String(statisticService?.gamesCount ?? 0))\n Рекорд: \(String(statisticService?.bestGame.correct ?? 0))/10 (\(statisticService?.bestGame.date.dateTimeString ?? ""))\n Средняя точность: \(totalAccuracy)%"
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 text: text,
