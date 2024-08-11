@@ -105,7 +105,7 @@
                                     <constraint firstItem="gL2-Am-fCi" firstAttribute="centerX" secondItem="lb4-ji-mro" secondAttribute="centerX" id="jtY-Td-ac1"/>
                                 </constraints>
                             </stackView>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="6nK-XT-tNG">
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="6nK-XT-tNG">
                                 <rect key="frame" x="0.0" y="59" width="430" height="839"/>
                             </activityIndicatorView>
                         </subviews>
