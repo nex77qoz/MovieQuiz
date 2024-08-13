@@ -11,12 +11,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Properties
     private var alertPresenter: AlertPresenter?
-    private var currentQuestionIndex = 0
     private var correctAnswers = 0
-    private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol?
+    private let presenter = MovieQuizPresenter()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -42,7 +41,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else { return }
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.hideLoadingIndicator()
             self?.show(quiz: viewModel)
@@ -78,13 +77,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     // MARK: - Private Methods
-    // метод конвертации, который принимает моковый вопрос и возвращает вью модель для экрана вопроса
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
     
     // приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
     private func show(quiz step: QuizStepViewModel) {
@@ -110,12 +102,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     // приватный метод для показа результатов раунда квиза, принимает вью модель QuizResultsViewModel и ничего не возвращает
     private func show(quiz result: QuizResultsViewModel) {
+        statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
+        let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(presenter.questionsAmount)"
+        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            self.presenter.resetQuestionIndex()
+        }
         let alertModel = AlertModel(
             title: result.title,
             message: result.text,
             buttonText: result.buttonText,
             completion: { [weak self] in
-                self?.currentQuestionIndex = 0
+                self?.presenter.resetQuestionIndex()
                 self?.correctAnswers = 0
                 self?.questionFactory?.requestNextQuestion()
             }
@@ -126,11 +124,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // приватный метод, который содержит логику перехода в один из сценариев, метод ничего не принимает и ничего не возвращает
     private func showNextQuestionOrResults() {
         imageView.layer.borderWidth = 0
-        if currentQuestionIndex == questionsAmount - 1 {
-            statisticService?.store(correct: correctAnswers, total: questionsAmount)
+        if presenter.isLastQuestion() {
+            statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
+            let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(presenter.questionsAmount)"
             let totalAccuracy = String(format: "%.2f", statisticService?.totalAccuracy ?? 0.0)
             let text = """
-                        Ваш результат \(correctAnswers)/\(questionsAmount),
+                        Ваш результат \(currentGameResultLine),
                         Количество сыгранных квизов: \(String(statisticService?.gamesCount ?? 0))
                         Рекорд: \(String(statisticService?.bestGame.correct ?? 0))/\(String(statisticService?.bestGame.total ?? 0)) (\(statisticService?.bestGame.date.dateTimeString ?? ""))
                         Средняя точность: \(totalAccuracy)%
@@ -142,12 +141,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             )
             show(quiz: viewModel)
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
         }
     }
     
     private func showNetworkError(message: String) {
+        self.presenter.resetQuestionIndex()
+        self.correctAnswers = 0
         hideLoadingIndicator() // скрываем индикатор загрузки
         let alertModel = AlertModel( // создаём алерт об ошибке загрузки
             title: "Ошибка",
