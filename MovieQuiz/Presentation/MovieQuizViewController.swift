@@ -9,13 +9,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
+    // MARK: - IB Actions
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        presenter.yesButtonClicked(with: currentQuestion)
+    }
+    
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        presenter.noButtonClicked(with: currentQuestion)
+    }
+    
     // MARK: - Private Properties
     private var alertPresenter: AlertPresenter?
     private var correctAnswers = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol?
     private let presenter = MovieQuizPresenter()
+    private var currentQuestion: QuizQuestion?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -25,22 +34,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         showLoadingIndicator()
         questionFactory?.loadData()
         alertPresenter = AlertPresenter(viewController: self)
+        presenter.viewController = self        
+    }
         
-    }
-    
-    // MARK: - IB Actions
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        checkAnswer(for: true)
-    }
-    
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        checkAnswer(for: false)
-    }
-    
     // MARK: - Public Methods
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else { return }
-        currentQuestion = question
+        presenter.currentQuestion = question
         let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.hideLoadingIndicator()
@@ -70,12 +70,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     func didFailToLoadData(with error: Error) {
         showNetworkError(message: error.localizedDescription)
     }
-    
-    func checkAnswer(for answer: Bool) { // Проверяем правильность ответа
-        guard let currentQuestion = currentQuestion else { return }
-        let givenAnswer = answer
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
     // MARK: - Private Methods
     
     // приватный метод вывода на экран вопроса, который принимает на вход вью модель вопроса и ничего не возвращает
@@ -86,7 +80,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // приватный метод, который меняет цвет рамки, принимает на вход булевое значение и ничего не возвращает
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.cornerRadius = 20

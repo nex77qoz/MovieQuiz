@@ -9,7 +9,30 @@ import UIKit
 
 final class MovieQuizPresenter {
     let questionsAmount: Int = 10
-    private var currentQuestionIndex: Int = 0
+    var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+    var currentQuestionIndex: Int = 0
+    
+    func yesButtonClicked(with question: QuizQuestion?) {
+        guard let currQuestion = currentQuestion else {
+            return
+        }
+
+        let givenAnswer = true
+        
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currQuestion.correctAnswer)
+    }
+    func noButtonClicked(with question: QuizQuestion?) {
+        guard let currQuestion = currentQuestion else {
+            return
+        }
+        
+        let givenAnswer = false
+        
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currQuestion.correctAnswer)
+    }
+    
+    
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
     }
@@ -25,7 +48,7 @@ final class MovieQuizPresenter {
         QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)" // ОШИБКА: `currentQuestionIndex` и `questionsAmount` неопределены
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
         )
     }
 }
