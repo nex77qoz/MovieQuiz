@@ -8,7 +8,16 @@
 import UIKit
 
 final class MovieQuizPresenter: QuestionFactoryDelegate {
-    init(viewController: MovieQuizViewController) {
+    private let statisticService: StatisticServiceProtocol!
+    private var questionFactory: QuestionFactoryProtocol?
+    private weak var viewController: MovieQuizViewControllerProtocol?
+    
+    private let questionsAmount: Int = 10
+    private var currentQuestion: QuizQuestion?
+    private var currentQuestionIndex: Int = 0
+    private var correctAnswers = 0
+
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         statisticService = StatisticService()
@@ -29,18 +38,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             self?.viewController?.show(quiz: viewModel)
         }
     }
-    
-    let questionsAmount: Int = 10
-    var currentQuestion: QuizQuestion?
-    private weak var viewController: MovieQuizViewController?
-    var currentQuestionIndex: Int = 0
-    var correctAnswers = 0
-    private var questionFactory: QuestionFactoryProtocol?
-    private let statisticService: StatisticServiceProtocol!
-    
-    
-    
-    // приватный метод, который меняет цвет рамки, принимает на вход булевое значение и ничего не возвращает
+
     func showAnswerResult(isCorrect: Bool) {
         didAnswer(isCorrectAnswer: isCorrect)
         
@@ -102,11 +100,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         let isCorrect = isCorrectAnswer
         
         if (isCorrect) {
-            viewController?.imageView.layer.borderColor = UIColor.ypGreen.cgColor
             correctAnswers += 1
-        } else {
-            viewController?.imageView.layer.borderColor = UIColor.ypRed.cgColor
-        }
+        } 
     }
     
     func isLastQuestion() -> Bool {
@@ -122,6 +117,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     func switchToNextQuestion() {
         currentQuestionIndex += 1
     }
+    
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
@@ -129,6 +125,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
         )
     }
+    
     func showNextQuestionOrResults() {
         if self.isLastQuestion() {
             let text = "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"

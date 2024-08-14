@@ -1,12 +1,12 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     // MARK: - IB Outlets
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var textLabel: UILabel!
-    
-    @IBOutlet internal var imageView: UIImageView!
-    
+    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet private var noButton: UIButton!
+    @IBOutlet private var yesButton: UIButton!
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - IB Actions
@@ -25,7 +25,6 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        showLoadingIndicator()
         alertPresenter = AlertPresenter(viewController: self)
         presenter = MovieQuizPresenter(viewController: self)
     }
@@ -41,12 +40,12 @@ final class MovieQuizViewController: UIViewController {
     }
     
     func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
     }
     // MARK: - Private Methods
     
     func show(quiz step: QuizStepViewModel) {
-        imageView.layer.borderWidth = 0
+        imageView.layer.borderColor = UIColor.clear.cgColor
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
@@ -60,25 +59,18 @@ final class MovieQuizViewController: UIViewController {
 
     func show(quiz result: QuizResultsViewModel) {
         let message = presenter.makeResultsMessage()
-        
-        let alert = UIAlertController(
+        let alertModel = AlertModel(
             title: result.title,
             message: message,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            
-            self.presenter.restartGame()
-        }
-        
-        alert.addAction(action)
-        
-        self.present(alert, animated: true, completion: nil)
+            buttonText: result.buttonText,
+            completion: { [weak self] in
+                self?.presenter.restartGame()
+            }
+        )
+        alertPresenter?.present(alert: alertModel)
     }
     
     func showNetworkError(message: String) {
-        presenter.restartGame()
         hideLoadingIndicator() // скрываем индикатор загрузки
         let alertModel = AlertModel( // создаём алерт об ошибке загрузки
             title: "Ошибка",
