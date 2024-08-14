@@ -13,6 +13,7 @@ protocol StatisticServiceProtocol {
     var totalAccuracy: Double { get }
     
     func store(correct count: Int, total amount: Int)
+    func resetStats()
 }
 
 struct GameResult {

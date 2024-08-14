@@ -20,9 +20,6 @@ final class QuestionFactory: QuestionFactoryProtocol {
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.delegate?.didBeginLoading()
-            }
             let index = (0..<self.movies.count).randomElement() ?? 0
             guard let movie = self.movies[safe: index] else { return }
             

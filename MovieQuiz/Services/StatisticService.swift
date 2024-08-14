@@ -38,6 +38,11 @@ final class StatisticService: StatisticServiceProtocol {
         }
     }
     
+    func resetStats() {
+        storage.set(0, forKey: Keys.bestGameCorrect.rawValue)
+        storage.set(0, forKey: Keys.bestGameTotal.rawValue)
+    }
+    
     var correctAnswers: Int {
         get { storage.integer(forKey: Keys.correct.rawValue) }
         set { storage.set(newValue, forKey: Keys.correct.rawValue) }
