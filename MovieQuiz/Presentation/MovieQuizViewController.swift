@@ -35,14 +35,13 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     }
     
     func showLoadingIndicator() {
-        activityIndicator.startAnimating() // включаем анимацию
-        view.bringSubviewToFront(activityIndicator) // поднимаем индикатор над картинкой
+        activityIndicator.startAnimating()
+        view.bringSubviewToFront(activityIndicator)
     }
     
     func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
     }
-    // MARK: - Private Methods
     
     func show(quiz step: QuizStepViewModel) {
         imageView.layer.borderColor = UIColor.clear.cgColor
@@ -71,8 +70,8 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     }
     
     func showNetworkError(message: String) {
-        hideLoadingIndicator() // скрываем индикатор загрузки
-        let alertModel = AlertModel( // создаём алерт об ошибке загрузки
+        hideLoadingIndicator()
+        let alertModel = AlertModel(
             title: "Ошибка",
             message: "Ошибка загрузки",
             buttonText: "Попробовать ещё раз",
@@ -80,6 +79,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
                 self?.presenter.restartGame()
             }
         )
-        alertPresenter?.present(alert: alertModel) // выводим алерт
+        alertPresenter?.present(alert: alertModel)
     }
 }

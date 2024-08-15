@@ -31,7 +31,7 @@ class MovieQuizUITests: XCTestCase {
         let firstPoster = app.images["Poster"]
         let firstPosterData = firstPoster.screenshot().pngRepresentation
         XCTAssertEqual(indexLabel.label, "1/10")
-
+        
         app.buttons["Yes"].tap()
         sleep(3)
         
@@ -47,7 +47,7 @@ class MovieQuizUITests: XCTestCase {
         let firstPoster = app.images["Poster"]
         let firstPosterData = firstPoster.screenshot().pngRepresentation
         XCTAssertEqual(indexLabel.label, "1/10")
-
+        
         app.buttons["No"].tap()
         sleep(3)
         
